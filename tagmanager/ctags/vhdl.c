@@ -694,6 +694,17 @@ static void parseVar (boolean local)
 	deleteToken (name);
 }
 
+static void parseArchitecture (tokenInfo * const token)
+{
+	tokenInfo *const name = newToken ();
+	readToken (name);
+	if (! isKeyword (name, KEYWORD_OF)) {
+		makeVhdlTag (name, VHDLTAG_RECORD);
+	}
+	skipToKeyword (KEYWORD_IS);
+	deleteToken (name);
+}
+
 static void parseSubProgram (tokenInfo * const token)
 {
 	tokenInfo *const name = newToken ();
@@ -777,6 +788,9 @@ static void parseKeywords (tokenInfo * const token, boolean local)
 {
 	switch (token->keyword)
 	{
+		case KEYWORD_ARCHITECTURE:
+			parseArchitecture (token);
+			break;
 		case KEYWORD_COMPONENT:
 			parseModule (token);
 			break;
