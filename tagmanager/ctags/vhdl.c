@@ -1,6 +1,6 @@
 /*
 *   $Id: vhdl.c 652 2008-04-18 03:51:47Z elliotth $
-* 
+*
 *   Copyright (c) 2008, Nicolas Vincent
 *
 *   This source code is released for free distribution under the terms of the
@@ -177,7 +177,7 @@ static jmp_buf Exception;
 /* Used to index into the VhdlKinds table. */
 typedef enum {
 	VHDLTAG_UNDEFINED = -1,
-	VHDLTAG_CONSTANT,
+	VHDLTAG_VARIABLE,
 	VHDLTAG_TYPE,
 	VHDLTAG_SUBTYPE,
 	VHDLTAG_RECORD,
@@ -191,7 +191,7 @@ typedef enum {
 } vhdlKind;
 
 static kindOption VhdlKinds[] = {
-	{TRUE, 'c', "variable", "constant declarations"},
+	{TRUE, 'v', "variable", "variable declarations"},
 	{TRUE, 't', "typedef", "type definitions"},
 	{TRUE, 'T', "typedef", "subtype definitions"},
 	{TRUE, 'r', "struct", "record names"},
@@ -678,7 +678,7 @@ static void parseTypes (tokenInfo * const token)
 	deleteToken (name);
 }
 
-static void parseConstant (boolean local)
+static void parseVar (boolean local)
 {
 	tokenInfo *const name = newToken ();
 	readToken (name);
@@ -688,7 +688,7 @@ static void parseConstant (boolean local)
 	}
 	else
 	{
-		makeVhdlTag (name, VHDLTAG_CONSTANT);
+		makeVhdlTag (name, VHDLTAG_VARIABLE);
 	}
 	fileSkipToCharacter (';');
 	deleteToken (name);
@@ -777,35 +777,41 @@ static void parseKeywords (tokenInfo * const token, boolean local)
 {
 	switch (token->keyword)
 	{
-	case KEYWORD_END:
-		fileSkipToCharacter (';');
-		break;
-	case KEYWORD_CONSTANT:
-		parseConstant (local);
-		break;
-	case KEYWORD_TYPE:
-		parseTypes (token);
-		break;
-	case KEYWORD_SUBTYPE:
-		parseTypes (token);
-		break;
-	case KEYWORD_ENTITY:
-		parseModule (token);
-		break;
-	case KEYWORD_COMPONENT:
-		parseModule (token);
-		break;
-	case KEYWORD_FUNCTION:
-		parseSubProgram (token);
-		break;
-	case KEYWORD_PROCEDURE:
-		parseSubProgram (token);
-		break;
-	case KEYWORD_PACKAGE:
-		parsePackage (token);
-		break;
-	default:
-		break;
+		case KEYWORD_COMPONENT:
+			parseModule (token);
+			break;
+		case KEYWORD_CONSTANT:
+			parseVar (local);
+			break;
+		case KEYWORD_END:
+			fileSkipToCharacter (';');
+			break;
+		case KEYWORD_ENTITY:
+			parseModule (token);
+			break;
+		case KEYWORD_FUNCTION:
+			parseSubProgram (token);
+			break;
+		case KEYWORD_PACKAGE:
+			parsePackage (token);
+			break;
+		case KEYWORD_PROCEDURE:
+			parseSubProgram (token);
+			break;
+		case KEYWORD_SIGNAL:
+			parseVar (local);
+			break;
+		case KEYWORD_SUBTYPE:
+			parseTypes (token);
+			break;
+		case KEYWORD_TYPE:
+			parseTypes (token);
+			break;
+		case KEYWORD_VARIABLE:
+			parseVar (local);
+			break;
+		default:
+			break;
 	}
 }
 
